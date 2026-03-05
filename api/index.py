@@ -1,7 +1,8 @@
+
 import sys
 import os
 
-# Add the root directory and backend directory to the path
+# The backend/app is now at root-relative path
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if path not in sys.path:
     sys.path.insert(0, path)
@@ -10,4 +11,4 @@ backend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "ba
 if backend_path not in sys.path:
     sys.path.insert(0, backend_path)
 
-from app.main import app
+from backend.app.main import app
