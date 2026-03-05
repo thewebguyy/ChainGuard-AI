@@ -1,7 +1,16 @@
-node_modules
+# Build artifacts
 .next
-backend/__pycache__
-backend/venv
-frontend/node_modules
+node_modules
 frontend/.next
-scripts
+frontend/node_modules
+
+# Python
+**/__pycache__
+.venv
+venv
+.env
+.env.local
+.env.production
+
+# Local scripts (Vercel doesn't need these for the runtime)
+scripts/
