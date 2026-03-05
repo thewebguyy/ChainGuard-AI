@@ -37,12 +37,15 @@ interface AppState {
         supplierCount: number;
         supplierLimit: number;
     };
+
+    // API Actions
+    fetchData: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>((set) => ({
     // Navigation
     currentPage: "dashboard",
-    setCurrentPage: (page) => set({ currentPage: page }),
+    setCurrentPage: (page: string) => set({ currentPage: page }),
 
     // Sidebar
     sidebarCollapsed: false,
@@ -52,21 +55,21 @@ export const useAppStore = create<AppState>((set) => ({
     // Suppliers
     suppliers: SUPPLIERS,
     selectedSupplier: null,
-    setSelectedSupplier: (s) => set({ selectedSupplier: s }),
+    setSelectedSupplier: (s: Supplier | null) => set({ selectedSupplier: s }),
     supplierFilter: "all",
-    setSupplierFilter: (f) => set({ supplierFilter: f }),
+    setSupplierFilter: (f: string) => set({ supplierFilter: f }),
     supplierSearch: "",
-    setSupplierSearch: (s) => set({ supplierSearch: s }),
+    setSupplierSearch: (s: string) => set({ supplierSearch: s }),
 
     // Alerts
     alerts: ALERTS,
-    acknowledgeAlert: (id) =>
+    acknowledgeAlert: (id: string) =>
         set((state) => ({
             alerts: state.alerts.map((a) =>
                 a.id === id ? { ...a, acknowledged: true } : a
             ),
         })),
-    resolveAlert: (id) =>
+    resolveAlert: (id: string) =>
         set((state) => ({
             alerts: state.alerts.map((a) =>
                 a.id === id ? { ...a, resolved: true } : a
@@ -82,5 +85,27 @@ export const useAppStore = create<AppState>((set) => ({
         tier: "pro",
         supplierCount: 12,
         supplierLimit: 100,
+    },
+
+    // API Actions
+    fetchData: async () => {
+        try {
+            const isProd = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
+            const baseUrl = isProd ? "" : "http://localhost:8000";
+
+            const [supRes, alertRes] = await Promise.all([
+                fetch(`${baseUrl}/api/v1/suppliers/`),
+                fetch(`${baseUrl}/api/v1/alerts/`),
+            ]);
+
+            if (supRes.ok && alertRes.ok) {
+                const suppliers = await supRes.json();
+                const alerts = await alertRes.json();
+                if (suppliers && suppliers.length > 0) set({ suppliers });
+                if (alerts && alerts.length > 0) set({ alerts });
+            }
+        } catch (error) {
+            console.error("Failed to fetch live data:", error);
+        }
     },
 }));

@@ -9,7 +9,16 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "password"
     POSTGRES_DB: str = "chainguard"
-    SQLALCHEMY_DATABASE_URI: str = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}/{POSTGRES_DB}"
+    
+    # Priority: Direct DATABASE_URL (Supabase), then fallback to local
+    SUPABASE_DATABASE_URL: str = ""
+    
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        if self.SUPABASE_DATABASE_URL:
+            # Handle the 'postgres://' vs 'postgresql://' fix for some frameworks
+            return self.SUPABASE_DATABASE_URL.replace("postgres://", "postgresql://", 1)
+        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}/{self.POSTGRES_DB}"
     
     JWT_SECRET: str = "secret_key_change_me"
     ALGORITHM: str = "HS256"
